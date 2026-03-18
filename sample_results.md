@@ -28,9 +28,9 @@ M AI-studio / Patent Pending / 2026-03-18
 
 | AI | Reconstruction | Meaning | Emotion |
 |---|---|---|---|
-| ChatGPT | 科学家情情地做出了一个重大发现。 | OK | OK |
-| Gemini | 科学家情情地做出了重大发现。 | OK | OK |
-| Perplexity | 科学家情情地做出了重大发现。 | OK | OK |
+| ChatGPT | 科学家悄悄地做出了一个重大发现。 | OK | OK |
+| Gemini | 科学家悄悄地做出了重大发现。 | OK | OK |
+| Perplexity | 科学家悄悄地做出了重大发现。 | OK | OK |
 
 ### Test 2
 **Original:** 她微笑着，但眼中充满了泪水。
@@ -72,7 +72,7 @@ M AI-studio / Patent Pending / 2026-03-18
 > Note: 自己 (Perplexity) = 他 in self-referential context -- meaning preserved.
 
 ### Test 5
-**Original:** 尽管危险，她还是毫不犊豫地向前迈进。
+**Original:** 尽管危险，她还是毫不犹豫地向前迈进。
 **Compressed:** 21 bytes (61.1% reduction)
 **Skeleton:** `尽管[CONJ,NEG] 危险[MOD] 她[SUBJ] 还是[CONJ] 毫不犹豫[OBJ] 向前[OBJ] 迈进[VERB]`
 
