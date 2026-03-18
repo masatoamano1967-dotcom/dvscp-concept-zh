@@ -1,114 +1,123 @@
-# DVSCP — 维度向量语义压缩协议
+# DVSCP -- Chinese Version (Simplified)
+## Dynamic Vector Semantic Compression Protocol
 
-**作者：** 天野雅人（Masato Amano）  
-**状态：** 概念验证阶段 — 专利申请中  
-**版本：** v5.1
+**Author:** Masato Amano (M AI-studio)
+**Status:** Patent Application Pending
+**Version:** v1.0 / 2026-03-18
+
+> Japanese repository: [dvscp-concept-ja](https://github.com/masatoamano1967-dotcom/dvscp-concept-ja)
+> English repository: [dvscp-concept-en](https://github.com/masatoamano1967-dotcom/dvscp-concept-en)
 
 ---
 
-## 概述
+## Overview
 
-DVSCP 是一种新型通信协议提案，其核心思想是从文本中提取"语义核心"并加以压缩，再由接收端的 AI 负责还原。
+DVSCP is a communication protocol that extracts only the 'semantic skeleton' from text, compresses it into binary data, and delegates reconstruction to an AI on the receiving side.
 
 ```
-[原始文本] → 语义提取（基于规则） → 压缩数据包 → AI 还原 → [还原文本]
+[Original Chinese Text]
+    |
+    v (jieba segmentation + CC-CEDICT, no AI)
+[Semantic Skeleton Packets]
+    |
+    v (Any LLM)
+[Reconstructed Simplified Chinese]
 ```
 
-> 日本語リポジトリ：[dvscp-concept-ja](https://github.com/masatoamano1967-dotcom/dvscp-concept-ja)  
-> English repository：[dvscp-concept-en](https://github.com/masatoamano1967-dotcom/dvscp-concept-en)
+**Core principle:** Transmit only what the receiving AI cannot infer from context.
 
 ---
 
-## 核心理念
+## Chinese-Specific Design
 
-### 职责分离
+### Word Segmentation
+Chinese text has no spaces between words. jieba handles segmentation automatically with rule-based algorithms -- no AI required.
 
-- **发送端（编码器）：** 完全不使用 AI，仅通过确定性规则生成语义"种子"。
-- **接收端（解码器）：** 利用大型语言模型的学习知识，从"种子"重新生成完整文本。
+### Coordinate System
+CC-CEDICT (~120,000 entries) provides stable X/Y coordinates via entry line numbers and POS bands:
+- Noun band: Y = 0-63
+- Verb band: Y = 64-127
+- Adjective band: Y = 128-191
+- Other band: Y = 192-255
 
-这一设计使得接收端 AI 性能每提升一次，还原质量便自动随之提升，无需修改编码器。
+### Negation (DIR_R -- highest priority)
+Chinese negation words always transmitted as anchors:
+- 不 / 没 / 无 / 非 -- semantic reversal
+- 但 / 然而 / 尽管 -- contrast/adversative
 
-### 语义惯性
-
-文本并非独立词语的简单叠加，一旦建立起语境（惯性），后续词语便可从中预测。DVSCP 正是利用这一特性，对**可由惯性推断的信息不予发送**。
-
-> "语言诞生的瞬间，其中已包含着指向下一个词语的方向性。"
-
-### 三级信息分类
-
-| 分类 | 数据包大小 | 对象信息 |
-|------|-----------|---------|
-| **锚点（Anchor）** | 数字节 | 打破惯性的信息（专有名词、否定、转折等） |
-| **惯性（Inertia）** | 最小化 | 可从当前语境推断的信息 |
-| **跳过（Skip）** | 0 字节 | AI 可自动补全的语法要素 |
+### Always Skipped
+Structural particles (的/地/得), aspect particles (了/着/过), and sentence-final particles (吗/呢/吧) carry no semantic weight and are always omitted.
 
 ---
 
-## 实验验证结果
+## Benchmark Results (Measured / 2026-03-18)
 
-### 英语测试
+| # | Original text | Original | Compressed | Reduction |
+|---|---|---|---|---|
+| 1 | 科学家悄悄地做出了重大发现。 | 42B | 13B | **69.0%** |
+| 2 | 她微笑着，但眼中充满了泪水。 | 42B | 18B | **57.1%** |
+| 3 | 他从不放弃，即使一切看起来都没有希望。 | 57B | 27B | **52.6%** |
+| 4 | 老人沿着河边慢慢地走，回忆着他的青春。 | 57B | 24B | **57.9%** |
+| 5 | 尽管危险，她还是毫不犹豫地向前迈进。 | 54B | 21B | **61.1%** |
+| **Total** | | **252B** | **103B** | **57.9%** |
 
-| 文本类型 | 原始大小 | 压缩后 | 压缩率 |
+> Note: Chinese UTF-8 encodes each character as 3 bytes. A V5 packet is also
+> 3 bytes, so single-character words yield ~0% per-token reduction. This is a
+> UTF-8 encoding property, not a theoretical limitation of DVSCP.
+
+---
+
+## Multi-AI Reconstruction Test
+
+| Test | ChatGPT | Gemini | Perplexity | Meaning | Emotion |
+|---|---|---|---|---|---|
+| 1 | 科学家悄悄地做出了一个重大发现。 | 科学家悄悄地做出了重大发现。 | 科学家悄悄地做出了重大发现。 | OK | OK |
+| 2 | 她微笑着，但眼中充满了泪水。 | 她微笑着，但眼中却充满了泪水。 | 她微笑着，但眼中却充满了泪水。 | OK | OK |
+| 3 | 他从不放弃，即使一切看起来都没有希望。 | 他从不放弃，即使一切看起来都毫无希望。 | 他从不放弃，即使一切看起来都没有希望。 | OK | OK |
+| 4 | 老人沿着河边慢慢走着，回忆着他的青春。 | 老人沿着河边慢慢走着，回忆着他的青春。 | 老人沿着河边慢慢走着，回忆着自己的青春。 | OK | OK |
+| 5 | 尽管危险，她还是毫不犹豫地向前迈进。 | 尽管危险，她还是毫不犹豫地向前迈进。 | 尽管危险，她还是毫不犹豫地向前迈进。 | OK | OK |
+
+**Meaning preserved: 5/5 | Emotion preserved: 5/5 | NEG/contrast preserved: 5/5**
+
+> Test 5: All 3 AIs produced identical output -- perfect score.
+> Synonym enrichment (却/毫无/自己) by Gemini/Perplexity is meaning-equivalent or stronger.
+
+See [sample_results.md](./sample_results.md) for full analysis.
+
+---
+
+## Three-Language Comparison
+
+| Metric | Japanese v5.1 | English v1.0 | Chinese v1.0 |
 |---|---|---|---|
-| 叙事文 | 226 bytes | 85 bytes | **62.4%** |
-| 技术说明文 | 290 bytes | 53 bytes | **81.7%** |
-| 含否定与转折 | 181 bytes | 64 bytes | **64.6%** |
-| 技术说明文（长） | 471 bytes | 67 bytes | **85.8%** |
-| **合计** | **1,168 bytes** | **269 bytes** | **77.0%** |
+| Tokenizer | MeCab | spaCy | jieba |
+| Coordinate system | LaBSE+UMAP | WordNet synset | CC-CEDICT ID |
+| Avg compression | ~77-85% | 70.5% | **57.9%** |
+| Meaning preservation | 100% | 100% | **100%** |
+| Emotion preservation | 100% | 100% | **100%** |
+| Encoding | Rule-based | Rule-based | Rule-based |
 
-### 日语测试
-
-| 指标 | 结果 |
-|---|---|
-| 原始大小 | 约 3,300–4,400 bytes |
-| 压缩后大小 | 508–1,158 bytes |
-| **压缩率** | **77–85%** |
-| 核心意图还原率 | 100%（经 4 个独立 AI 系统验证） |
-
-**关键发现：** 英语与日语的压缩率相近（约 77%），表明语义惯性是一种**与语言无关的普遍原理**。
-
-详细示例请参见 [`examples/sample_results.md`](./examples/sample_results.md)。
+All three languages achieve 100% meaning and emotion preservation,
+demonstrating that **DVSCP's semantic skeleton principle is language-independent**.
 
 ---
 
-## 应用前景
-
-- **低带宽通信：** 太空、水下、灾害救援等极端通信场景
-- **存储革命：** 以语义骨架形式归档大量文本
-- **跨语言转换：** 通过语义层实现自然的多语言还原
-- **语音扩展：** 融合音高、情感、语调的音频版本研究正在进行中
-
----
-
-## 诚邀研究者提供意见
-
-欢迎就以下问题提供反馈：
-
-1. **语言学 / 认知科学：** "语义惯性"概念与现有语言处理理论有何对应关系？
-2. **信息论：** 本方法与香农信息论有怎样的关联？
-3. **普适性：** 基于形态分析的设计能否推广至类型学差异较大的语言？
-4. **评估指标：** 应如何客观衡量"语义保真度"？
-5. **失效场景：** 在哪些情况下本方法会失效？
-
----
-
-## 仓库结构
+## Repository Structure
 
 ```
 dvscp-concept-zh/
-├── README.md               ← 本文件
-├── THEORY.md               ← 理论背景（概念层面）
-├── LICENSE
-├── examples/
-│   └── sample_results.md   ← 压缩还原实验示例
-└── interface/
-    └── dvscp_interface.py  ← 接口定义（不含实现）
+  README.md            <- This file
+  THEORY.md            <- Theoretical background
+  sample_results.md    <- Full reconstruction experiment results
+  dvscp_interface.py   <- Public interface definition (implementation not disclosed)
+  LICENSE
 ```
 
 ---
 
-## 许可证
+## License
 
-© 2026 天野雅人（Masato Amano）. All Rights Reserved.  
-本仓库包含专利申请中的知识产权。  
-允许以研究为目的进行参考，但实现或再发布需获得明确的书面授权。
+Copyright 2026 Masato Amano. All Rights Reserved.
+This repository contains intellectual property subject to a pending patent application.
+Reference for research purposes is permitted.
+Implementation or redistribution requires explicit written permission.
