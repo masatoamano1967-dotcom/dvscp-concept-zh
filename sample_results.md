@@ -6,11 +6,11 @@ M AI-studio / Patent Pending / 2026-03-18
 
 | # | Original | Original (bytes) | Compressed (bytes) | Reduction |
 |---|----------|-----------------|-------------------|----------|
-| 1 | 科学家情情地做出了重大发现。 | 42 | 13 | 69.0% |
+| 1 | 科学家悄悄地做出了重大发现。 | 42 | 13 | 69.0% |
 | 2 | 她微笑着，但眼中充满了泪水。 | 42 | 18 | 57.1% |
 | 3 | 他从不放弃，即使一切看起来都没有希望。 | 57 | 27 | 52.6% |
 | 4 | 老人沿着河边慢慢地走，回忆着他的青春。 | 57 | 24 | 57.9% |
-| 5 | 尽管危险，她还是毫不犊豫地向前迈进。 | 54 | 21 | 61.1% |
+| 5 | 尽管危险，她还是毫不犹豫地向前迈进。 | 54 | 21 | 61.1% |
 | **AVG** | | **50.4** | **20.6** | **57.9%** |
 
 > Note: Chinese UTF-8 encodes each character as 3 bytes. A single-character
@@ -22,9 +22,9 @@ M AI-studio / Patent Pending / 2026-03-18
 ## Multi-AI Reconstruction Test
 
 ### Test 1
-**Original:** 科学家情情地做出了重大发现。
+**Original:** 科学家悄悄地做出了重大发现。
 **Compressed:** 13 bytes (69.0% reduction)
-**Skeleton:** `科学家[SUBJ] 情情地[OBJ] 做出[VERB] 重大[MOD] 发现[VERB]`
+**Skeleton:** `科学家[SUBJ] 悄悄地[OBJ] 做出[VERB] 重大[MOD] 发现[VERB]`
 
 | AI | Reconstruction | Meaning | Emotion |
 |---|---|---|---|
@@ -74,13 +74,13 @@ M AI-studio / Patent Pending / 2026-03-18
 ### Test 5
 **Original:** 尽管危险，她还是毫不犊豫地向前迈进。
 **Compressed:** 21 bytes (61.1% reduction)
-**Skeleton:** `尽管[CONJ,NEG] 危险[MOD] 她[SUBJ] 还是[CONJ] 毫不犊豫[OBJ] 向前[OBJ] 迈进[VERB]`
+**Skeleton:** `尽管[CONJ,NEG] 危险[MOD] 她[SUBJ] 还是[CONJ] 毫不犹豫[OBJ] 向前[OBJ] 迈进[VERB]`
 
 | AI | Reconstruction | Meaning | Emotion |
 |---|---|---|---|
-| ChatGPT | 尽管危险，她还是毫不犊豫地向前迈进。 | OK | OK |
-| Gemini | 尽管危险，她还是毫不犊豫地向前迈进。 | OK | OK |
-| Perplexity | 尽管危险，她还是毫不犊豫地向前迈进。 | OK | OK |
+| ChatGPT | 尽管危险，她还是毫不犹豫地向前迈进。 | OK | OK |
+| Gemini | 尽管危险，她还是毫不犹豫地向前迈进。 | OK | OK |
+| Perplexity | 尽管危险，她还是毫不犹豫地向前迈进。 | OK | OK |
 
 > Note: All 3 AIs produced identical reconstruction -- perfect score.
 
