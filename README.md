@@ -112,7 +112,23 @@ dvscp-concept-zh/
   dvscp_interface.py   <- Public interface definition (implementation not disclosed)
   LICENSE
 ```
+## 路线图 — 语音DVSCP（下一代）
 
+目前正在开发集成音频维度的下一代版本。
+
+| 轴 | 说明 |
+|---|---|
+| PITCH | 基频轮廓 |
+| INTON | 语调模式 |
+| EMOT | 情感极性 |
+| 惯性 | 韵律连续性（可预测时跳过） |
+
+**压缩率提升：** 语音DVSCP已实证将1分钟音频从约1.9MB压缩至582B，压缩率超过99%。
+
+文本DVSCP（日语/英语/中文）构成该统一架构的语义层。
+语音DVSCP是主发明，文本DVSCP作为其补充。
+
+*语音DVSCP — 专利申请中 / M AI-studio*
 ---
 
 ## License
